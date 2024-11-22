@@ -1,0 +1,187 @@
+import React, { useEffect, useState } from 'react';
+import axios from "axios";
+
+function BlogForm() {
+    const [title, setTitle] = useState("");
+    const [inhalt, setInhalt] = useState("");
+    //const[blogPosts, setBlogPosts] = useState([]);
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        // Debugging: Überprüfen, ob die Werte gesetzt sind
+        console.log("Title:", title);
+        console.log("Inhalt:", inhalt);
+
+        axios.post('http://localhost:5001/submit', {
+            title,
+            inhalt
+        })
+        .then(response => {
+            console.log("Response data:", response.data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    };
+    
+    
+    
+    return (
+        <form onSubmit={handleSubmit}>
+        <div className="form-group my-2">
+            <label htmlFor="exampleFormControlInput1">Titel des Blogs</label>
+            <input 
+                type="text" 
+                name="title" 
+                className="form-control" 
+                id="exampleFormControlInput1" 
+                placeholder="Titel"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)} // Wert aktualisieren
+            />
+        </div>
+        <div className="form-group my-2">
+            <label htmlFor="exampleFormControlTextarea1">Inhalt des Blogs</label>
+            <textarea
+                className="form-control" 
+                name="inhalt" 
+                id="exampleFormControlTextarea1" 
+                rows="4"
+                onChange={(e) => setInhalt(e.target.value)} // Wert aktualisieren
+            ></textarea>
+        </div>
+        <button type="submit" className="btn btn-primary my-2">Erstellen</button>
+    </form>
+    )
+}
+
+export default BlogForm;
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import BlogList from './Bloglist';
+
+function BlogForm() {
+    const [title, setTitle] = useState("");
+    const [inhalt, setInhalt] = useState("");
+    const [blogPosts, setBlogPosts] = useState([]);
+
+    // Hole die Blogposts initial von der API
+    useEffect(() => {
+        axios.get('http://localhost:5001/api')  // Angenommene URL für das Abrufen der Posts
+            .then(response => setBlogPosts(response.data))
+            .catch(error => console.error('Error fetching posts:', error));
+    }, []);
+
+    // Handle Form Submission
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        const newPost = { title, inhalt };
+
+        // Sende den neuen Blogpost an das Backend
+        axios.post('http://localhost:5001/submit', newPost)
+            .then(response => {
+                console.log("New post added:", response.data);
+                
+                // Füge den neuen Blogpost sofort zur Liste hinzu
+                setBlogPosts([newPost, ...blogPosts]); // Den neuen Post an den Anfang des Arrays setzen
+            })
+            .catch(error => console.error('Error adding post:', error));
+        
+        // Form zurücksetzen
+        setTitle("");
+        setInhalt("");
+    };
+
+    return (
+        <>
+            <form onSubmit={handleSubmit}>
+                <div className="form-group my-2">
+                    <label htmlFor="exampleFormControlInput1">Titel des Blogs</label>
+                    <input 
+                        type="text" 
+                        name="title" 
+                        className="form-control" 
+                        id="exampleFormControlInput1" 
+                        placeholder="Titel"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)} 
+                    />
+                </div>
+                <div className="form-group my-2">
+                    <label htmlFor="exampleFormControlTextarea1">Inhalt des Blogs</label>
+                    <textarea 
+                        className="form-control" 
+                        name="inhalt" 
+                        id="exampleFormControlTextarea1" 
+                        rows="4"
+                        value={inhalt}
+                        onChange={(e) => setInhalt(e.target.value)} 
+                    ></textarea>
+                </div>
+                <button type="submit" className="btn btn-primary my-2">Erstellen</button>
+            </form>
+            <h1>Blog Übersicht</h1>
+            
+        </>
+    );
+}
+
+export default BlogForm;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* var blogPosts = [];
+var id = 0;
+
+app.get("/", (req, res) => {
+    res.json(blogPosts);
+});
+
+app.post("/submit", (req, res) => {
+    console.log("Received title:", req.body.title); // Ausgabe zum Testen
+    console.log("Received inhalt:", req.body.inhalt); // Ausgabe zum Testen
+
+    const newBlogpost = {
+        id: id++,
+        title: req.body.title,
+        inhalt: req.body.inhalt
+    };
+
+    blogPosts.push(newBlogpost);
+    res.json(newBlogpost);
+}); */
